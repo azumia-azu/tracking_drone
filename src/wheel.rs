@@ -1,10 +1,9 @@
-use stm32f1xx_hal::gpio::{Output, PushPull, gpiob::{PB10, PB11, PB12, PB13, Parts}};
+use stm32f1xx_hal::gpio::{Output, PushPull, gpiob::{PB10, PB11, PB12, PB13}};
 use embedded_hal::digital::v2::OutputPin;
 
 #[derive(Debug, Clone)]
 pub enum State {
     Forward,
-    Backward,
     TuringLeft,
     TuringRight,
     UTuringRight,
@@ -60,10 +59,6 @@ impl Update for WheelController {
                 self.left.forward();
                 self.right.forward();
             },
-            State::Backward => {
-                self.left.backward();
-                self.right.backward();
-            },
             State::UTuringLeft => {
                 self.left.backward();
                 self.right.forward();
@@ -95,18 +90,18 @@ struct LeftWheel {
 
 impl LeftWheel {
     fn forward(&mut self) {
-        self.forward.set_high();
-        self.backward.set_low();
+        self.forward.set_high().unwrap();
+        self.backward.set_low().unwrap();
     }
 
     fn backward(&mut self) {
-        self.forward.set_low();
-        self.backward.set_high();
+        self.forward.set_low().unwrap();
+        self.backward.set_high().unwrap();
     }
 
     fn stop(&mut self) {
-        self.forward.set_low();
-        self.backward.set_low();
+        self.forward.set_low().unwrap();
+        self.backward.set_low().unwrap();
     }
 }
 
@@ -117,36 +112,36 @@ struct RightWheel {
 
 impl RightWheel {
     fn forward(&mut self) {
-        self.forward.set_high();
-        self.backward.set_low();
+        self.forward.set_high().unwrap();
+        self.backward.set_low().unwrap();
     }
 
     fn backward(&mut self) {
-        self.forward.set_low();
-        self.backward.set_high();
+        self.forward.set_low().unwrap();
+        self.backward.set_high().unwrap();
     }
 
     fn stop(&mut self) {
-        self.forward.set_low();
-        self.backward.set_low();
+        self.forward.set_low().unwrap();
+        self.backward.set_low().unwrap();
     }
 }
 
 pub struct WheelControllerBuilder {
-    leftWheel: Option<LeftWheel>,
-    rightWheel: Option<RightWheel>,
+    left_wheel: Option<LeftWheel>,
+    right_wheel: Option<RightWheel>,
 }
 
 impl WheelControllerBuilder {
     pub fn builder() -> Self {
         Self { 
-            leftWheel: None, 
-            rightWheel:None,
+            left_wheel: None, 
+            right_wheel:None,
         }
     }
 
     pub fn left_wheel(mut self, pb10: PB10<Output<PushPull>>, pb11: PB11<Output<PushPull>>) -> Self {
-        self.leftWheel = Some(LeftWheel {
+        self.left_wheel = Some(LeftWheel {
             forward: pb11,
             backward: pb10,
         });
@@ -155,7 +150,7 @@ impl WheelControllerBuilder {
     }
 
     pub fn right_wheel(mut self, pb12: PB12<Output<PushPull>>, pb13: PB13<Output<PushPull>>) -> Self {
-        self.rightWheel = Some(RightWheel {
+        self.right_wheel = Some(RightWheel {
             forward: pb12,
             backward: pb13,
         });
@@ -163,10 +158,10 @@ impl WheelControllerBuilder {
         return self;
     }
 
-    pub fn build (mut self) -> WheelController {
+    pub fn build (self) -> WheelController {
         WheelController {
-            left: self.leftWheel.unwrap(),
-            right: self.rightWheel.unwrap(),
+            left: self.left_wheel.unwrap(),
+            right: self.right_wheel.unwrap(),
             state: State::Stop,
         }
     }

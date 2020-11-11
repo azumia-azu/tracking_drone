@@ -61,7 +61,7 @@ impl DetectorBuilder {
         return self;
     }
 
-    pub fn build(mut self) -> Detector {
+    pub fn build(self) -> Detector {
         Detector {
             do1: self.do1.unwrap(),
             do2: self.do2.unwrap(),

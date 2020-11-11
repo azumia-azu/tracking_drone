@@ -2,6 +2,7 @@
 #![no_std]
 #![no_main]
 
+#[allow(unused_must_use)]
 use panic_halt as _;
 
 use nb::block;
@@ -26,7 +27,7 @@ fn main() -> ! {
 
     let clocks = rcc.cfgr.freeze(&mut flash.acr);
 
-    let mut gpiob = dp.GPIOB.split(&mut rcc.apb2);
+    let gpiob = dp.GPIOB.split(&mut rcc.apb2);
     
     let (mut wheel, mut detector) = init(gpiob);
 
